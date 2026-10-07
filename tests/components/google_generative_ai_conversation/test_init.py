@@ -3,9 +3,9 @@
 from typing import Any
 from unittest.mock import AsyncMock, patch
 
+from aiohttp import ClientConnectionError
 import attr
 import pytest
-from requests.exceptions import Timeout
 from syrupy.assertion import SnapshotAssertion
 
 from homeassistant.components.google_generative_ai_conversation.const import (
@@ -45,7 +45,12 @@ from tests.common import MockConfigEntry
             False,
         ),
         (
-            Timeout,
+            TimeoutError,
+            ConfigEntryState.SETUP_RETRY,
+            False,
+        ),
+        (
+            ClientConnectionError("Cannot connect to host"),
             ConfigEntryState.SETUP_RETRY,
             False,
         ),

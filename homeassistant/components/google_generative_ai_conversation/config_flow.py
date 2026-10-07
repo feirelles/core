@@ -5,10 +5,10 @@ from functools import partial
 import logging
 from typing import Any, cast, override
 
+import aiohttp
 from google import genai
 from google.genai.errors import APIError, ClientError
 import probatio
-from requests.exceptions import Timeout
 
 from homeassistant.config_entries import (
     SOURCE_REAUTH,
@@ -114,7 +114,7 @@ class GoogleGenerativeAIConfigFlow(ConfigFlow, domain=DOMAIN):
             self._async_abort_entries_match(user_input)
             try:
                 await validate_input(self.hass, user_input)
-            except (APIError, Timeout) as err:
+            except (APIError, TimeoutError, aiohttp.ClientError) as err:
                 if isinstance(err, ClientError) and "API_KEY_INVALID" in str(err):
                     errors["base"] = "invalid_auth"
                 else:

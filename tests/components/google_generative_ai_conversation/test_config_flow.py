@@ -3,8 +3,8 @@
 from typing import Any
 from unittest.mock import Mock, patch
 
+from aiohttp import ClientConnectionError
 import pytest
-from requests.exceptions import Timeout
 
 from homeassistant import config_entries
 from homeassistant.components.google_generative_ai_conversation.const import (
@@ -686,7 +686,11 @@ async def test_subentry_options_switching(
             "cannot_connect",
         ),
         (
-            Timeout("deadline exceeded"),
+            TimeoutError,
+            "cannot_connect",
+        ),
+        (
+            ClientConnectionError("Cannot connect to host"),
             "cannot_connect",
         ),
         (

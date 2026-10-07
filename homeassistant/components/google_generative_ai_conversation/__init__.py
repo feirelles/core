@@ -3,9 +3,9 @@
 from functools import partial
 from types import MappingProxyType
 
+import aiohttp
 from google.genai import Client
 from google.genai.errors import APIError, ClientError
-from requests.exceptions import Timeout
 
 from homeassistant.config_entries import ConfigEntry, ConfigSubentry
 from homeassistant.const import CONF_API_KEY, Platform
@@ -68,11 +68,11 @@ async def async_setup_entry(
             model=RECOMMENDED_CHAT_MODEL,
             config={"http_options": {"timeout": TIMEOUT_MILLIS}},
         )
-    except (APIError, Timeout) as err:
+    except (TimeoutError, aiohttp.ClientError) as err:
+        raise ConfigEntryNotReady(err) from err
+    except APIError as err:
         if isinstance(err, ClientError) and "API_KEY_INVALID" in str(err):
             raise ConfigEntryAuthFailed(err.message) from err
-        if isinstance(err, Timeout):
-            raise ConfigEntryNotReady(err) from err
         raise ConfigEntryError(err) from err
     else:
         entry.runtime_data = client
